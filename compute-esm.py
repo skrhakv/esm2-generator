@@ -32,8 +32,8 @@ def main(input_path, output_dir):
                     (name, sequence1)
                 ]
                 batch_labels, batch_strs, batch_tokens = batch_converter(data)
-                batch_tokens = batch_tokens.cuda()
-                # Extract per-residue representations (on GPU)
+                batch_tokens = batch_tokens.to(device)
+                # Extract per-residue representations
                 with torch.no_grad():
                     results = model(batch_tokens, repr_layers=[36], return_contacts=True)
                 token_representations = results["representations"][36]
@@ -48,10 +48,9 @@ def main(input_path, output_dir):
             np.save(f'{output_dir}/{name}.npy', vectors)    
 #            del results, token_representations, batch_tokens
         if i % 500 == 0:
-            torch.cuda.empty_cache()   
+            if 'cuda' in device.type:
+                torch.cuda.empty_cache()   
             gc.collect()
-            
-
 
 
 if __name__ == "__main__":
